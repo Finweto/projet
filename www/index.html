@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<html>
+<header></header>
+
+
+<body>
+
+
+<h1>Bienvenue au tomsu</h1> 
+
+
+<span id="bonjour"></span><span id="scoreJoueur"></span></br>
+
+Le nombre de lettre à trouver est <span id="nbLettre"></span>
+
+
+<table id="grid">
+
+
+</table>
+
+
+<input type="text" id="txt"/>
+<input type="submit" value="Guess" id="guess"/>
+<div id="reponse"></div>
+<div id="fin"></div>
+<div id="erreur"></div>
+</body>
+</html>
+
+
+<input type="submit" value="Logout" id="logout"/>
+
+<script>
+
+$(document).ready(function(){
+
+
+    // Affichage nom
+    if(localStorage.getItem("username")!=null){
+        document.getElementById("bonjour").innerHTML="Bonjour "+localStorage.getItem("username")+", votre score est :";
+        document.getElementById("scoreJoueur").innerHTML=localStorage.getItem("score"); 
+    }else{
+        document.location = "/login.html"
+    }
+
+
+    var nbGuess=1;
+    var mot = "";
+
+    // Mettre le nombre de lettre
+
+    $.ajax({
+        url: "/mot",
+        method: "GET",
+
+        success: function (data) {
+            document.getElementById("nbLettre").innerHTML = data.length;
+            mot = data;
+
+            // Création de la grille
+
+            var tab="";
+            for(i=0;i<10;i++){
+                tab += "<tr id='"+i+"'>";
+                for(j=0;j<data.length;j++){
+                    tab +="<td id='"+i+"&"+j+"'></td>"
+                }
+                tab +="</tr>";
+            }
+            document.getElementById("grid").innerHTML = tab;
+        },
+
+        // Cas de failure
+
+        failure: function (){
+                console.log("ca a merdé chef");
+        }
+    })
+
+    
+
+    // Appelé quand le user clique sur le bouton guess
+
+    $("#guess").on("click", function(){
+        document.getElementById("erreur").innerHTML="";
+        var guess = document.getElementById("txt").value;
+        if(guess.length ==mot.length){
+
+
+            if(guess==mot){     // Le mot est trouvé
+                if(mot != localStorage.getItem("dernierMot")){
+                    newScore = parseInt(localStorage.getItem("score")) +1;
+                    nbTry= parseInt(localStorage.getItem("nbTry"))+1;
+                    avg = (parseInt(localStorage.getItem("avgTry"))*(nbTry-1) + nbGuess)/nbTry;
+
+                    localStorage.setItem("dernierMot",mot);
+                    localStorage.setItem("score",newScore);
+                    localStorage.setItem("nbTry", nbTry);
+                    localStorage.setItem("avgTry",avg);
+                    document.getElementById("scoreJoueur").innerHTML=localStorage.getItem("score");
+                }
+                document.getElementById("fin").innerHTML= "Bravo vous avez trouvé le mot en "+nbGuess+" essais"  + "(moyenne = "+localStorage.getItem("avgTry")+")";
+
+            }else{      // Le mot n'est pas trouvé
+    
+                nbGuess ++;
+
+                var i =0;
+                var indice =guess+"</br>";
+                var bool=false;
+
+                //Permet de trouver si les lettre sont à la bonne place, dans le mot ou mauvaise
+                while(i<mot.length){
+                    if(mot[i]==guess[i]){
+                        indice+=mot[i];
+                    }else{
+                        if(mot.includes(guess[i])){
+                            indice += "*";
+                        }else{
+                            indice += "#";
+                        }
+                    }
+                    i++;
+                }
+                // Affichage du mot entré et des indices
+                document.getElementById("reponse").innerHTML+=indice+"</br>";
+            }
+        }else{
+            document.getElementById("erreur").innerHTML = "Vous devez rentrer " + mot.length+"lettres";
+        }
+    });
+
+
+    
+    // Logout 
+
+    $("#logout").on("click",function(){
+        localStorage.removeItem("username");
+    });
+
+
+
+
+});
+
+</script>

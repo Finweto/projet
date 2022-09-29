@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<html>
+<header></header>
+
+
+<body>
+<h1>Login</h1>
+
+
+Veuillez entrer votre nom : </br>
+
+<input type ="text" id="username" required/>
+<input type ="submit" value="Valider" id="submit"/>
+
+
+</body>
+</html>
+
+
+<script>
+
+    $(document).ready(function(){
+        $("#submit").on("click",function(){
+            localStorage.setItem("username",document.getElementById("username").value);
+            localStorage.setItem("score",0);
+            localStorage.setItem("dernierMot", "");
+            localStorage.setItem("avgTry",0);
+            localStorage.setItem("nbTry",0);
+            document.location="/";
+        })
+
+
+    });
+
+
+
+</script>
